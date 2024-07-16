@@ -1,0 +1,267 @@
+import tkinter as tk
+from tkinter import messagebox
+
+
+class ShapeSelector(tk.Tk):
+    def __init__(self):
+        super().__init__()
+        self.title("Shape Selector")
+
+        self.selected_shapes = [None, None, None]
+        self.selected_sub_shapes = [[None, None] for _ in range(3)]
+        self.shape_count = {"Square": 0, "Triangle": 0, "Circle": 0}
+
+        self.sections = []
+
+        for i in range(3):
+            section_frame = tk.Frame(self, relief=tk.RIDGE, bd=2, padx=10, pady=10)
+            section_frame.pack(side=tk.LEFT, padx=10, pady=10)
+            self.sections.append(section_frame)
+            self.create_section(section_frame, i)
+
+        self.submit_button = tk.Button(self, text="Submit", command=self.submit, bg='lightblue',
+                                       font=('Helvetica', 14, 'bold'))
+        self.submit_button.pack(pady=20)
+
+    def create_section(self, frame, section_index):
+        shapes = ["Square", "Triangle", "Circle"]
+        main_frame = tk.Frame(frame)
+        main_frame.pack(pady=10)
+
+        for shape in shapes:
+            button = tk.Button(main_frame, text=shape, command=lambda s=shape, i=section_index: self.select_shape(s, i),
+                               width=10, height=2, bg='white', font=('Helvetica', 12))
+            button.pack(pady=5)
+
+        sub_frame = tk.Frame(frame)
+        sub_frame.pack(pady=10)
+
+        for row in range(2):
+            row_frame = tk.Frame(sub_frame)
+            row_frame.pack(pady=5)
+            for shape in shapes:
+                button = tk.Button(row_frame, text=shape,
+                                   command=lambda s=shape, i=section_index, r=row: self.select_sub_shape(s, i, r),
+                                   width=10, height=2, bg='white', font=('Helvetica', 12))
+                button.pack(side=tk.LEFT, padx=5)
+                button.config(state=tk.DISABLED)  # Disable initially
+
+    def select_shape(self, shape, section_index):
+        if self.selected_shapes[section_index] == shape:
+            self.selected_shapes[section_index] = None
+            self.reset_sub_shapes(section_index)
+        else:
+            self.selected_shapes[section_index] = shape
+        self.update_main_buttons()
+        self.update_sub_buttons()
+
+    def reset_sub_shapes(self, section_index):
+        for row in range(2):
+            shape = self.selected_sub_shapes[section_index][row]
+            if shape is not None:
+                self.shape_count[shape] -= 1
+            self.selected_sub_shapes[section_index][row] = None
+
+    def update_main_buttons(self):
+        selected_shapes_set = set(shape for shape in self.selected_shapes if shape is not None)
+        for section_index, frame in enumerate(self.sections):
+            main_frame = frame.winfo_children()[0]
+            for button in main_frame.winfo_children():
+                if button['text'] in selected_shapes_set and self.selected_shapes[section_index] != button['text']:
+                    button.config(state=tk.DISABLED, bg='lightgray')
+                else:
+                    button.config(state=tk.NORMAL, bg='white')
+                if self.selected_shapes[section_index] == button['text']:
+                    button.config(state=tk.NORMAL, bg='lightgreen')
+
+    def select_sub_shape(self, shape, section_index, row):
+        if self.selected_shapes[section_index] is None:
+            messagebox.showwarning("Warning", "Please select a shape in the upper section first.")
+            return
+
+        current_selection = self.selected_sub_shapes[section_index][row]
+        if current_selection == shape:
+            self.selected_sub_shapes[section_index][row] = None
+            self.shape_count[shape] -= 1
+        else:
+            if current_selection is not None:
+                self.shape_count[current_selection] -= 1
+            self.selected_sub_shapes[section_index][row] = shape
+            self.shape_count[shape] += 1
+        self.update_sub_buttons()
+
+    def update_sub_buttons(self):
+        for section_index, frame in enumerate(self.sections):
+            sub_frame = frame.winfo_children()[1]
+            for row in range(2):
+                row_frame = sub_frame.winfo_children()[row]
+                for button in row_frame.winfo_children():
+                    shape = button['text']
+                    if self.selected_shapes[section_index] is None:
+                        button.config(state=tk.DISABLED, bg='lightgray')
+                    elif self.selected_sub_shapes[section_index][row] == shape:
+                        button.config(state=tk.NORMAL, bg='lightgreen')
+                    elif self.shape_count[shape] >= 2:
+                        button.config(state=tk.DISABLED, bg='lightgray')
+                    else:
+                        button.config(state=tk.NORMAL, bg='white')
+
+    def submit(self):
+        if None in self.selected_shapes or any(None in sublist for sublist in self.selected_sub_shapes):
+            messagebox.showwarning("Warning", "Please select a shape in each section and each row.")
+        else:
+            alg(self.selected_shapes, self.selected_sub_shapes)
+
+
+def alg(shapes, sub_shapes):
+    analogs = {"Square": 4, "Triangle": 3, "Circle": 0}
+
+    analog_shapes = []
+    analog_sub_shapes = []
+    shapes_elements = []
+
+    for element_shapes, element_sub_shapes in zip(shapes, sub_shapes):
+        tv_numbers = []
+        shapes_elements_now = []
+
+        primary_shape = analogs.get(element_shapes)
+        analog_shapes.append(primary_shape)
+        shapes_elements_now.append(primary_shape)
+
+        for pod_element_sub_shapes in element_sub_shapes:
+            tv_shape = analogs.get(pod_element_sub_shapes)
+            tv_numbers.append(tv_shape)
+            shapes_elements_now.append(tv_shape)
+
+        analog_sub_shapes.append(tv_numbers)
+        shapes_elements.append(shapes_elements_now)
+
+    left = shapes_elements[0]
+    left_shape = left[0]
+    left_tv = left[1:]
+    mid = shapes_elements[1]
+    mid_shape = mid[0]
+    mid_tv = mid[1:]
+    right = shapes_elements[2]
+    right_shape = right[0]
+    right_tv = right[1:]
+
+    # print("---------------------------")
+    # print(left, left_shape, left_tv)
+    # print(mid, mid_shape, mid_tv)
+    # print(right, right_shape, right_tv)
+
+    rus_analogs = {4: "4", 3: "3", 0: "0"}
+    res = ''
+
+    end_left = False
+    while not end_left:
+        changed = False
+        for i in range(len(left_tv)):
+            if left_tv[i] == left_shape:
+                if left_shape not in mid_tv:
+                    mid_tv.append(left_shape)
+                    res += f'Л-{rus_analogs.get(left_shape)}-Ц _ '
+                else:
+                    right_tv.append(left_shape)
+                    res += f'Л-{rus_analogs.get(left_shape)}-П _ '
+
+                left_tv = left_tv[:i] + left_tv[i + 1:]
+                changed = True
+                break
+
+        if not changed:
+            end_left = True
+
+    # print("---------------------------")
+    # print(left, left_shape, left_tv)
+    # print(mid, mid_shape, mid_tv)
+    # print(right, right_shape, right_tv)
+
+    end_mid = False
+    while not end_mid:
+        changed = False
+        for i in range(len(mid_tv)):
+            if mid_tv[i] == mid_shape:
+                if mid_shape not in left_tv:
+                    left_tv.append(mid_shape)
+                    res += f'Ц-{rus_analogs.get(mid_shape)}-Л _ '
+                else:
+                    right_tv.append(mid_shape)
+                    res += f'Ц-{rus_analogs.get(mid_shape)}-П _ '
+
+                mid_tv = mid_tv[:i] + mid_tv[i + 1:]
+                changed = True
+                break
+
+        if not changed:
+            end_mid = True
+
+    # print("---------------------------")
+    # print(left, left_shape, left_tv)
+    # print(mid, mid_shape, mid_tv)
+    # print(right, right_shape, right_tv)
+
+    end_right = False
+    while not end_right:
+        changed = False
+        for i in range(len(right_tv)):
+            if right_tv[i] == right_shape:
+                if right_shape not in left_tv:
+                    left_tv.append(right_shape)
+                    res += f'П-{rus_analogs.get(right_shape)}-Л _ '
+                else:
+                    mid_tv.append(right_shape)
+                    res += f'П-{rus_analogs.get(right_shape)}-Ц _ '
+
+                right_tv = right_tv[:i] + right_tv[i + 1:]
+                changed = True
+                break
+
+        if not changed:
+            end_right = True
+
+    # print("---------------------------")
+    # print(left, left_shape, left_tv)
+    # print(mid, mid_shape, mid_tv)
+    # print(right, right_shape, right_tv)
+
+    # print("---------------------------")
+    print(res[:-3])
+    print("---------------------------")
+
+if __name__ == "__main__":
+    app = ShapeSelector()
+    app.mainloop()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
