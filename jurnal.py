@@ -56,14 +56,14 @@ try:
         login_xpath = "/html/body/div/div/div/div/form/div[1]/div[1]/input"
         login = driver.find_element("xpath", login_xpath)
 
-        login.send_keys("guseynov.a.s@edu.mirea.ru")
+        login.send_keys("login")
 
         driver.implicitly_wait(10)
 
         password_xpath = "/html/body/div/div/div/div/form/div[1]/div[2]/input"
         password = driver.find_element("xpath", password_xpath)
 
-        password.send_keys("Alex14102004")
+        password.send_keys("password")
 
         driver.implicitly_wait(10)
 
