@@ -103,7 +103,7 @@ def orders(message):
 
                             snils = driver.find_element(By.XPATH, "/html/body/div[3]/div/div/div[1]/main/div/div[3]/div[2]/div/div[2]/table/tbody/tr[" + str(i) + "]/td[3]").text
 
-                            if snils == "***********":
+                            if snils == "snils":
 
                                 res = driver.find_element(By.XPATH, "/html/body/div[3]/div/div/div[1]/main/div/div[3]/div[2]/div/div[2]/table/tbody/tr[" + str(i) + "]/td[1]").text
                                 bot.send_message(message.chat.id, ("Твой номер в списке: " + res).format(message.from_user, bot.get_me()))
