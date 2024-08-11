@@ -32,7 +32,7 @@ nest_asyncio.apply()
 # Включаем логирование, чтобы не пропустить важные сообщения
 logging.basicConfig(level=logging.INFO)
 
-# Объект бота (https://t.me/test_task_gas_bot)
+# Объект бота
 bot = Bot(token="7440865950:AAEk4OAoyLaBUUykTsOxjSwkjEYBEDBpwr4")
 
 # Диспетчер
@@ -51,7 +51,6 @@ creds = ServiceAccountCredentials.from_json_keyfile_name("bot1.json", scope)
 client = gspread.authorize(creds)
 
 # Открываем таблицу и выбираем лист
-# https://docs.google.com/spreadsheets/d/15R5IZ3UcRPCpvcJdhWIKCer9EV787iAWmiTw0oNMlFE/edit?usp=sharing
 sheet = client.open("гугл_табличка").sheet1
 
 # Текст приглашения для пользователя
